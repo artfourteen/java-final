@@ -1,9 +1,9 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { CheckCircle, Home, RotateCcw, XCircle } from "lucide-react"
-import type { Question } from "@/data/questions"
+import {Button} from "@/components/ui/button"
+import {Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle} from "@/components/ui/card"
+import {CheckCircle, Home, RotateCcw, XCircle} from "lucide-react"
+import type {Question} from "@/data/questions"
 
 interface QuizResultsProps {
   questions: Question[]
@@ -12,7 +12,7 @@ interface QuizResultsProps {
   onGoHome: () => void
 }
 
-export function QuizResults({ questions, answers, onRestart, onGoHome }: QuizResultsProps) {
+export function QuizResults({questions, answers, onRestart, onGoHome}: QuizResultsProps) {
   const correctAnswers = questions.filter((q) => answers[q.id] === q.correctAnswer).length
   const totalQuestions = questions.length
   const score = Math.round((correctAnswers / totalQuestions) * 100)
@@ -53,8 +53,11 @@ export function QuizResults({ questions, answers, onRestart, onGoHome }: QuizRes
             <h3 className="text-lg font-semibold">Question Summary</h3>
             <div className="max-h-60 overflow-y-auto space-y-2 pr-2">
               {questions.map((question) => {
-                const userAnswer = answers[question.id]
-                const isCorrect = userAnswer === question.correctAnswer
+                const userAnswerKey = answers[question.id] as keyof typeof question.options | null
+                const isCorrect = userAnswerKey === question.correctAnswer
+
+                const userAnswerText = userAnswerKey ? question.options[userAnswerKey] : "Not answered"
+                const correctAnswerText = question.options[question.correctAnswer]
 
                 return (
                   <div
@@ -62,27 +65,31 @@ export function QuizResults({ questions, answers, onRestart, onGoHome }: QuizRes
                     className={`p-3 rounded-lg flex items-start gap-2 ${isCorrect ? "bg-green-50" : "bg-red-50"}`}
                   >
                     {isCorrect ? (
-                      <CheckCircle className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
+                      <CheckCircle className="h-5 w-5 text-green-500 shrink-0 mt-0.5"/>
                     ) : (
-                      <XCircle className="h-5 w-5 text-red-500 shrink-0 mt-0.5" />
+                      <XCircle className="h-5 w-5 text-red-500 shrink-0 mt-0.5"/>
                     )}
                     <div>
                       <p className="text-sm font-medium">Question {question.id}</p>
-                      <p className="text-xs text-gray-700">
+                      <p className="text-xs text-gray-700 mb-1">
                         {question.question.length > 80 ? question.question.substring(0, 80) + "..." : question.question}
                       </p>
-                      <p className="text-xs text-gray-500">
-                        {userAnswer && (
-                          <>
-                            Your answer:{" "}
-                            <span className={isCorrect ? "text-green-600 font-medium" : "text-red-600 font-medium"}>
-                              {userAnswer}
-                            </span>{" "}
-                            |{" "}
-                          </>
-                        )}
-                        Correct answer: <span className="text-green-600 font-medium">{question.correctAnswer}</span>
-                      </p>
+
+                      {userAnswerKey && (
+                        <div className="text-xs">
+                          <p className={`${isCorrect ? "text-green-600" : "text-red-600"}`}>
+                            <span className="text-gray-500">Your answer: </span>
+                            <span className="font-medium">{userAnswerText}</span>
+                          </p>
+
+                          {!isCorrect && (
+                            <p className="text-green-600">
+                              <span className="text-gray-500">Correct answer: </span>
+                              <span className="font-medium">{correctAnswerText}</span>
+                            </p>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
                 )
@@ -92,11 +99,11 @@ export function QuizResults({ questions, answers, onRestart, onGoHome }: QuizRes
         </CardContent>
         <CardFooter className="flex gap-2 justify-between">
           <Button variant="outline" onClick={onGoHome}>
-            <Home className="h-4 w-4 mr-2" />
+            <Home className="h-4 w-4 mr-2"/>
             Home
           </Button>
           <Button onClick={onRestart}>
-            <RotateCcw className="h-4 w-4 mr-2" />
+            <RotateCcw className="h-4 w-4 mr-2"/>
             Restart Quiz
           </Button>
         </CardFooter>

@@ -1,10 +1,16 @@
 "use client"
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Label } from "@/components/ui/label"
-import type { Question } from "@/data/questions"
+import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card"
+import {RadioGroup, RadioGroupItem} from "@/components/ui/radio-group"
+import {Label} from "@/components/ui/label"
+import {useEffect, useState} from "react"
+import type {Question} from "@/data/questions"
 import {Check, X} from "lucide-react";
+
+type ShuffledOption = {
+  text: string
+  originalKey: string
+}
 
 interface QuizQuestionProps {
   question: Question
@@ -13,24 +19,37 @@ interface QuizQuestionProps {
   isSubmitted: boolean
 }
 
-export function QuizQuestion({ question, selectedAnswer, onSelectAnswer, isSubmitted }: QuizQuestionProps) {
+export function QuizQuestion({question, selectedAnswer, onSelectAnswer, isSubmitted}: QuizQuestionProps) {
+  const [shuffledOptions, setShuffledOptions] = useState<ShuffledOption[]>([])
+
+  useEffect(() => {
+    const options = Object.entries(question.options).map(([key, value]) => ({
+      text: value,
+      originalKey: key,
+    }))
+
+    const shuffled = [...options].sort(() => Math.random() - 0.5)
+    setShuffledOptions(shuffled)
+  }, [question])
+
   return (
     <Card className="w-full">
       <CardHeader>
         <CardTitle className="text-xl">
-          {question.question}
+          {question.id}. {question.question}
         </CardTitle>
       </CardHeader>
       <CardContent>
         <RadioGroup
           value={selectedAnswer || ""}
-          onValueChange={isSubmitted ? () => {} : onSelectAnswer}
+          onValueChange={isSubmitted ? () => {
+          } : onSelectAnswer}
           className="space-y-3"
           disabled={isSubmitted}
         >
-          {Object.entries(question.options).map(([key, value]) => {
-            const isSelected = selectedAnswer === key
-            const isCorrect = key === question.correctAnswer
+          {shuffledOptions.map((option) => {
+            const isSelected = selectedAnswer === option.originalKey
+            const isCorrect = option.originalKey === question.correctAnswer
 
             let optionClass = "flex items-center space-x-2 rounded-lg border p-4 transition-colors "
 
@@ -49,13 +68,17 @@ export function QuizQuestion({ question, selectedAnswer, onSelectAnswer, isSubmi
             }
 
             return (
-              <div key={key} className={optionClass}>
-                <RadioGroupItem value={key} id={`${question.id}-${key}`} disabled={isSubmitted} />
+              <div key={option.originalKey} className={optionClass}>
+                <RadioGroupItem
+                  value={option.originalKey}
+                  id={`${question.id}-${option.originalKey}`}
+                  disabled={isSubmitted}
+                />
                 <Label
-                  htmlFor={`${question.id}-${key}`}
+                  htmlFor={`${question.id}-${option.originalKey}`}
                   className={`flex-1 cursor-pointer text-base ${isSubmitted && !isSelected && isCorrect ? "font-semibold" : ""}`}
                 >
-                  <span className="font-semibold mr-2">{key}:</span> {value}
+                  {option.text}
                   {isSubmitted && isSelected && isCorrect && (
                     <div className="flex items-center gap-1 ml-2 text-green-600 font-semibold"><Check /> Correct</div>
                   )}
@@ -67,15 +90,9 @@ export function QuizQuestion({ question, selectedAnswer, onSelectAnswer, isSubmi
             )
           })}
         </RadioGroup>
-
-        {isSubmitted && selectedAnswer !== question.correctAnswer && (
-          <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
-            <p className="text-sm font-medium text-blue-800">
-              The correct answer is: <span className="font-bold">{question.correctAnswer}</span>
-            </p>
-          </div>
-        )}
       </CardContent>
     </Card>
   )
 }
+
+
