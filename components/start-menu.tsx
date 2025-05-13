@@ -45,7 +45,7 @@ export function StartMenu() {
         </CardHeader>
         <CardContent>
           <p className="text-sm text-gray-500">
-            Take a quick quiz with 30 randomly selected questions. Great for a brief practice session or when you$apos;re
+            Take a quick quiz with 30 randomly selected questions. Great for a brief practice session or when you&apos;re
             short on time.
           </p>
         </CardContent>
