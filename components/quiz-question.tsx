@@ -36,7 +36,7 @@ export function QuizQuestion({question, selectedAnswer, onSelectAnswer, isSubmit
     <Card className="w-full">
       <CardHeader>
         <CardTitle className="text-xl">
-          {question.id}. {question.question}
+          {question.question}
         </CardTitle>
       </CardHeader>
       <CardContent>
